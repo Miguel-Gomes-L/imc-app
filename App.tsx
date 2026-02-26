@@ -4,40 +4,43 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 
 export default function App() {
     const [peso, setPeso] = useState<string>("");
+    const [mostrarAlerta, setMostrarAlerta] = useState<boolean>(false);
     const [altura, setAltura] = useState<string>("");
-    const [Imc, setIMC] = useState<number | null>(null);
-    const [classificacao, setClassificacao] = useState<string | null>(null);
-    const [mensagemErro, setMensagemErro] = useState<string | null>(null);
+    const [imc, setIMC] = useState<number | null>(null);
+    const [classicacao, setClassicacao] = useState<string | null>(null);
 
-    function validarCampos(){
-        if (!peso || !altura) {
-            setMensagemErro("Preencha o peso e a altura");
-            return;
-        }
+ function validarCampos() {
 
-        const pesoNum = parseFloat(peso);
-        const alturaNum = parseFloat(altura);
+    const pesoLimpo = peso.trim();
+    const alturaLimpa = altura.trim();
 
-        if (isNaN(pesoNum) || isNaN(alturaNum) || pesoNum <= 0 || alturaNum <= 0) {
-            setMensagemErro("Digite valores numéricos válidos para peso e altura");
-            return;
-        }
-
-        setMensagemErro(null);
-        calculoIMC();
+    if (pesoLimpo === "" || alturaLimpa === "") {
+        setMostrarAlerta(true);
+        setIMC(null);
+        return;
     }
+
+    if (isNaN(Number(pesoLimpo)) || isNaN(Number(alturaLimpa))) {
+        setMostrarAlerta(true);
+        setIMC(null);
+        return;
+    }
+
+    setMostrarAlerta(false);
+    calculoIMC();
+}
 
     function calculoIMC() {
         let imcCalculado = parseFloat(peso) / (parseFloat(altura) * parseFloat(altura));
         setIMC(imcCalculado);
         if(imcCalculado < 18.5){
-            setClassificacao("Abaixo do peso");
-        } else if(imcCalculado < 25){
-            setClassificacao("Peso normal");
+            setClassicacao("Abaixo do peso");
+        }else if(imcCalculado < 25){
+            setClassicacao("Peso Normal");
         }else if(imcCalculado < 30){
-            setClassificacao("Sobrepeso");
+            setClassicacao("Sobrepeso");
         }else{
-            setClassificacao("Obeso");
+            setClassicacao("Obeso");
         }
     }
 
@@ -48,36 +51,40 @@ export default function App() {
             </View>
 
             <View style={styles.form}>
-                {mensagemErro && (
-                    <Text style={styles.mensagemErro}>{mensagemErro}</Text>
-                )}
+                {mostrarAlerta && (
+                <Text style={styles.alerta}>
+                      Preencha o peso e a altura
+                        </Text>
+                    )}
 
                 <Text style={styles.label}>Altura</Text>
-                <TextInput style={styles.campo} onChangeText={setAltura} value={altura}></TextInput>
+                <TextInput style={styles.campo} onChangeText={setAltura}></TextInput>
 
                 <Text style={styles.label}>Peso</Text>
-                <TextInput style={styles.campo} onChangeText={setPeso} value={peso}></TextInput>
+                <TextInput style={styles.campo} onChangeText={setPeso}></TextInput>
 
                 <TouchableOpacity 
-                style={styles.btn}
-                onPress={validarCampos}
+                    style={styles.btn}
+                    onPress={validarCampos}
                 >
                     <Text style={styles.btntext}>Calcular</Text>
                 </TouchableOpacity>
 
-                {Imc && (
-                    <View style={styles.resultado}>
-                        <Text style={styles.labelResultado}>Seu IMC é:</Text>  
-                        <Text style={styles.resultadoIMC}>{Imc?.toFixed(1)}</Text>  
-                        <Text style={styles.labelResultado}>Classificação: </Text>  
-                        <Text style={styles.classificacaoIMC}>{classificacao}</Text>  
-                    </View>
+                {imc != null && (
+                <View style={styles.resultado}>
+                    <Text style={styles.labelResultado}>Seu IMC é:</Text>
+                    <Text style={styles.resultadoIMC}>{imc?.toFixed(1)}</Text>
+                    <Text style={styles.labelResultado}>Classicação:</Text>
+                    <Text style={styles.classificacaoIMC}>{classicacao}</Text>
+                </View>
                 )}
             </View>
+
             <StatusBar style="auto" />
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -155,13 +162,13 @@ const styles = StyleSheet.create({
         fontSize: 24,
         marginBottom: 10,
     },
-    mensagemErro: {
-        backgroundColor: "#F33",
-        color: "#FFF",
-        padding: 15,
-        borderRadius: 10,
+    alerta: {
         textAlign: 'center',
+        backgroundColor: "#F00",
+        color: "#FFF",
+        padding: 10,
+        borderRadius: 10,
         fontSize: 18,
-        marginBottom: 20,
+        marginBottom: 20
     }
 });
